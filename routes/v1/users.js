@@ -9,7 +9,6 @@ var Users = require.main.require('./src/user'),
 	utils = require('./utils'),
 	async = require.main.require('async');
 
-
 module.exports = function(/*middleware*/) {
 	var app = require('express').Router();
 
@@ -93,6 +92,7 @@ module.exports = function(/*middleware*/) {
 
 	app.route('/:uid/tokens')
 		.get(apiMiddleware.requireUser, function(req, res) {
+
 			if (parseInt(req.params.uid, 10) !== parseInt(req.user.uid, 10)) {
 				return errorHandler.respond(401, res);
 			}
@@ -124,6 +124,13 @@ module.exports = function(/*middleware*/) {
 			errorHandler.handle(err, res);
 		});
 	});
+
+	app.route('/:uid/external')	
+		.get(apiMiddleware.requireUser, function(req, res) {
+			auth.mapExternalId(req, res, function(err, uid) {
+				errorHandler.handle(err, res, { uid: uid });
+			});
+		})
 
 	return app;
 };
