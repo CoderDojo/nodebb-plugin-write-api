@@ -54,4 +54,11 @@ API.reloadSettings = function(hash) {
 	}
 };
 
+API.EnableUserFieldsToWrite = function(data, callback){
+	//enable these fields for writing...
+	data.fields.push('picture');
+	data.fields.push('uploadedpicture')
+	callback(null, data);
+}
+
 module.exports = API;
