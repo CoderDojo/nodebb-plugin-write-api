@@ -90,6 +90,18 @@ module.exports = function(/*middleware*/) {
 			});
 		});
 
+	app.route('/:uid/ban')
+		.post(apiMiddleware.requireUser, apiMiddleware.exposeAdmin, function(req, res) {
+			Users.ban(req.params.uid, function(err) {
+				errorHandler.handle(err, res);
+			});
+		})
+		.delete(apiMiddleware.requireUser, apiMiddleware.exposeAdmin, function(req, res) {
+			Users.unban(req.params.uid, function(err) {
+				errorHandler.handle(err, res);
+			});
+		});
+
 	app.route('/:uid/tokens')
 		.get(apiMiddleware.requireUser, function(req, res) {
 
