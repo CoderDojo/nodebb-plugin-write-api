@@ -2,7 +2,7 @@
 /* globals module, require */
 
 var Topics = require.main.require('./src/topics'),
-	PostTools = require.main.require('./src/postTools'),
+	Posts = require.main.require('./src/posts'),
 	apiMiddleware = require('./middleware'),
 	errorHandler = require('../../lib/errorHandler'),
 	utils = require('./utils'),
@@ -21,11 +21,38 @@ module.exports = function(middleware) {
 					cid: req.body.cid,
 					title: req.body.title,
 					content:req.body.content,
-					uid: req.user.uid
+					uid: req.user.uid,
+					timestamp: req.body.timestamp
 				};
 
 			Topics.post(payload, function(err, data) {
 				return errorHandler.handle(err, res, data);
+			});
+		});
+
+	app.route('/:tid')
+		.post(apiMiddleware.requireUser, apiMiddleware.validateTid, function(req, res) {
+			if (!utils.checkRequired(['content'], req, res)) {
+				return false;
+			}
+
+			var payload = {
+					tid: req.params.tid,
+					uid: req.user.uid,
+					req: req,	// For IP recording
+					content: req.body.content,
+					timestamp: req.body.timestamp
+				};
+
+			if (req.body.toPid) { payload.toPid = req.body.toPid; }
+
+			Topics.reply(payload, function(err, returnData) {
+				errorHandler.handle(err, res, returnData);
+			});
+		})
+		.delete(apiMiddleware.requireUser, apiMiddleware.validateTid, function(req, res) {
+			Topics.delete(req.params.tid, function(err) {
+				errorHandler.handle(err, res);
 			});
 		})
 		.put(apiMiddleware.requireUser, function(req, res) {
@@ -46,33 +73,8 @@ module.exports = function(middleware) {
 			if (req.body.topic_thumb) { payload.options.topic_thumb = req.body.topic_thumb; }
 			if (req.body.tags) { payload.options.tags = req.body.tags; }
 
-			PostTools.edit(payload, function(err, returnData) {
+			Posts.edit(payload, function(err, returnData) {
 				errorHandler.handle(err, res, returnData);
-			});
-		});
-
-	app.route('/:tid')
-		.post(apiMiddleware.requireUser, apiMiddleware.validateTid, function(req, res) {
-			if (!utils.checkRequired(['content'], req, res)) {
-				return false;
-			}
-
-			var payload = {
-					tid: req.params.tid,
-					uid: req.user.uid,
-					req: req,	// For IP recording
-					content: req.body.content
-				};
-
-			if (req.body.toPid) { payload.toPid = req.body.toPid; }
-
-			Topics.reply(payload, function(err, returnData) {
-				errorHandler.handle(err, res, returnData);
-			});
-		})
-		.delete(apiMiddleware.requireUser, apiMiddleware.validateTid, function(req, res) {
-			Topics.delete(req.params.tid, function(err) {
-				errorHandler.handle(err, res);
 			});
 		});
 
