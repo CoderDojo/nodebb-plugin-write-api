@@ -66,7 +66,6 @@ module.exports = function(middleware) {
 				content: req.body.content,
 				options: {}
 			};
-			console.log(payload);
 
 			// Maybe a "set if available" utils method may come in handy
 			if (req.body.handle) { payload.handle = req.body.handle; }
